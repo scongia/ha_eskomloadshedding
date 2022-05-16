@@ -1,0 +1,47 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Eskom Load Shedding Integration",
+                "description": "Once complete, select 'Configure' to set your province and suburb"
+            }
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error"
+        },
+        "abort": {
+            "already_configured": "Device is already configured"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Step 1",
+                "description": "Confirm scan interval",
+                "data": {
+                    "province_name": "Province",
+                    "scan_interval": "Scan Interval (minutes)",
+                    "manual": "Only check once (for testing only)",
+                    "set_area_flag": "Continue to location config"
+                }
+            },
+            "suburb_search": {
+                "title": "Step 2",
+                "description": "Select province and search for suburb",
+                "data": {
+                    "province_name": "Province",
+                    "suburb_search": "Suburb Search"
+                }
+            },
+            "suburb_select": {
+                "title": "Step 3",
+                "description": "Select suburb",
+                "data": {
+                    "suburb_name": "Suburb"
+                }
+            }
+        }
+    }
+}
