@@ -11,7 +11,7 @@ from load_shedding.providers.eskom import Province, Stage
 
 DOMAIN = "eskomloadshedding"
 
-DEBUG_FLAG = True
+DEBUG_FLAG = False
 
 DEBUG_STAGE: Final = Stage.STAGE_2
 DEBUG_SCHEDULE: Final = [
