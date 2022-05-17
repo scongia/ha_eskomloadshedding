@@ -1,12 +1,10 @@
 # eskomloadshedding
 
 [![GitHub Release][releases-shield]][releases]
-[![hacs][hacsbadge]][hacs]
 [![Project Maintenance][maintenance-shield]][user_profile]
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
+[![Dependency][dependency-shield]][load_shedding_api]
 
 **Beta Testing**
-
 This is a component designed for [Home Assistant](https://www.home-assistant.io) and intended for South African users.
 
 The EskomLoadshedding integration component reports the current load shedding stage from Eskom (South African national utility provider) and provides a 7 day view of the corresponding load shedding schedule for a configured area.
@@ -19,10 +17,15 @@ Configure Province         | Configure Suburb
 :-------------------------:|:-------------------------:
 ![Lovelace](/assets/configure_province.jpg) |  ![Calendar](/assets/configure_suburb.jpg)
 
+<div align="center">
+
+  <a href="https://www.buymeacoffee.com/scongia">![example1](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge)</a>
+
+</div>
+
 If a province and suburb are configured, the component provides the calendar sensor containing the corresponding load shedding schedule for that area, and an additional sensor reporting when the next outage will be (should this be required for any automations). 
 
 The Province and Suburb can be configured using the configuration wizard accessible for the integrations page.
-
 
 ## Download
 
@@ -62,11 +65,13 @@ Once you have downloaded the component, you can install integration as follows:
 <!---->
 [releases-shield]: https://img.shields.io/github/v/release/scongia/ha_eskomloadshedding?style=for-the-badge
 [releases]: https://github.com/scongia/ha_eskomloadshedding/releases
-[hacsbadge]: https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge
-[hacs]: https://github.com/custom-components/hacs
+
 [maintenance-shield]: https://img.shields.io/badge/maintainer-%40scongia-blue.svg?style=for-the-badge
 [user_profile]: https://github.com/scongia
+
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
 [buymecoffee]: https://www.buymeacoffee.com/scongia
 
+[dependency-shield]: https://img.shields.io/badge/Dependency-load--shedding_v0.4.0-blue?logo=gitlab&style=for-the-badge
+[load_shedding_api]: https://pypi.org/project/load-shedding
 
