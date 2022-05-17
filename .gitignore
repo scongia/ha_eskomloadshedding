@@ -1,0 +1,15 @@
+__pycache__
+.mypy_cache
+.devcontainer
+.vscode
+.github
+manage
+requirements.txt
+Makefile
+notes.txt
+
+# macOS Finder
+.DS_Store
+
+# Windows Explorer
+desktop.ini

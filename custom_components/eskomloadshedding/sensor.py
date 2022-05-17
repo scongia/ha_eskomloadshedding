@@ -1,9 +1,8 @@
 """Support for Speedtest.net internet speed testing sensor."""
 from __future__ import annotations
 
-from typing import Any, cast
 from datetime import datetime
-from load_shedding.providers.eskom import Stage, Province
+from typing import Any, cast
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -15,8 +14,10 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from load_shedding.providers.eskom import Province, Stage
 
 from . import EskomLoadsheddingDataCoordinator
+
 from .const import (  # ATTR_BYTES_RECEIVED,; ATTR_BYTES_SENT,; ATTR_SERVER_COUNTRY,
     ATTR_PROVINCE_ID,
     ATTR_PROVINCE_NAME,
@@ -84,8 +85,11 @@ class EskomLoadsheddingSensor(
                 self._state = self.coordinator.data[self.entity_description.key].value
             if self.entity_description.key == ATTR_SHEDDING_NEXT:
                 state = self.coordinator.data[self.entity_description.key]
-                date_time_format = '%Y-%m-%d %H:%M'
-                self._state = datetime.strptime(state,date_time_format)
+                if state is None:
+                    self._state = None
+                else:
+                    date_time_format = "%Y-%m-%d %H:%M"
+                    self._state = datetime.strptime(state, date_time_format)
         return self._state
 
     @property
@@ -93,22 +97,42 @@ class EskomLoadsheddingSensor(
         """Return the state attributes."""
         if self.coordinator.data is not None:
             if self.coordinator.config_entry.options.get(CONF_PROVINCE_ID) is not None:
-                self._attrs.update({ATTR_PROVINCE_NAME: str(Province(self.coordinator.config_entry.options.get(CONF_PROVINCE_ID)))})
+                self._attrs.update(
+                    {
+                        ATTR_PROVINCE_NAME: str(
+                            Province(
+                                self.coordinator.config_entry.options.get(
+                                    CONF_PROVINCE_ID
+                                )
+                            )
+                        )
+                    }
+                )
             else:
                 self._attrs.update({ATTR_PROVINCE_NAME: "NOT_CONFIGURED"})
 
             self._attrs.update(
                 {
-                    ATTR_PROVINCE_ID: self.coordinator.config_entry.options.get(CONF_PROVINCE_ID,"NOT_CONFIGURED"),
-                    ATTR_SUBURB_ID: self.coordinator.config_entry.options.get(CONF_SUBURB_ID,"NOT_CONFIGURED"),
-                    ATTR_SCAN_INTERVAL: self.coordinator.config_entry.options.get(CONF_SCAN_PERIOD,DEFAULT_SCAN_INTERVAL)
+                    ATTR_PROVINCE_ID: self.coordinator.config_entry.options.get(
+                        CONF_PROVINCE_ID, "NOT_CONFIGURED"
+                    ),
+                    ATTR_SUBURB_ID: self.coordinator.config_entry.options.get(
+                        CONF_SUBURB_ID, "NOT_CONFIGURED"
+                    ),
+                    ATTR_SCAN_INTERVAL: self.coordinator.config_entry.options.get(
+                        CONF_SCAN_PERIOD, DEFAULT_SCAN_INTERVAL
+                    ),
                 }
             )
 
             if self.entity_description.key == "stage":
-                self._attrs[ATTR_SHEDDING_STAGE] = self.coordinator.data[ ATTR_SHEDDING_STAGE].value
+                self._attrs[ATTR_SHEDDING_STAGE] = self.coordinator.data[
+                    ATTR_SHEDDING_STAGE
+                ].value
             elif self.entity_description.key == "next_outage":
-                self._attrs[ATTR_SHEDDING_NEXT] = self.coordinator.data[ATTR_SHEDDING_NEXT]
+                self._attrs[ATTR_SHEDDING_NEXT] = self.coordinator.data[
+                    ATTR_SHEDDING_NEXT
+                ]
 
         return self._attrs
 

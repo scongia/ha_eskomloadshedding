@@ -1,9 +1,16 @@
-from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
 from datetime import datetime, timedelta, timezone
 
 from homeassistant.helpers.config_validation import boolean
+from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
 
-from .const import (DEBUG_STAGE, DEBUG_SCHEDULE, ATTR_SHEDDING_STAGE)
+from .const import (
+    ATTR_SCHEDULE,
+    ATTR_SHEDDING_NEXT,
+    ATTR_SHEDDING_STAGE,
+    DEBUG_SCHEDULE,
+    DEBUG_STAGE,
+)
+
 
 class EskomAPI:
     """Interface class to obtain loadshedding information using the Eskom API"""
@@ -13,7 +20,7 @@ class EskomAPI:
         self.eskom = Eskom()
         self.stage = Stage.UNKNOWN
         self.stage_changed_flag = True
-        self.results = EskomLoadsheddingResults( )
+        self.results = EskomLoadsheddingResults()
 
         self.debug_flag: bool = debug_flag
 
@@ -38,7 +45,9 @@ class EskomAPI:
         if self.debug_flag:
             schedule = DEBUG_SCHEDULE
         else:
-            schedule = self.eskom.get_schedule(province=province, suburb=suburb, stage=stage)
+            schedule = self.eskom.get_schedule(
+                province=province, suburb=suburb, stage=stage
+            )
 
         utc_tz = timezone.utc
         days = 7
@@ -58,21 +67,21 @@ class EskomAPI:
 
         return self.stage_changed_flag
 
-class EskomLoadsheddingResults(object):
-    """Class for holding the results """
 
-    def  __init__(self, stage=Stage.UNKNOWN, schedule=[]):
+class EskomLoadsheddingResults:
+    """Class for holding the results"""
+
+    def __init__(self, stage=Stage.UNKNOWN, schedule=[]):
         """Init Results"""
         self.stage = stage
         self.schedule = schedule
 
     def dict(self):
         """Return dictionary of result data"""
-        data = {
-            ATTR_SHEDDING_STAGE: self.stage,
-            ATTR_SCHEDULE: self.schedule
-        }
-        if( len(self.schedule) > 0 ):
+        data = {ATTR_SHEDDING_STAGE: self.stage, ATTR_SCHEDULE: self.schedule}
+        if len(self.schedule) > 0:
             next_outage = self.schedule[0][0]
             data.update({ATTR_SHEDDING_NEXT: next_outage})
+        else:
+            data.update({ATTR_SHEDDING_NEXT: None})
         return data
