@@ -1,5 +1,5 @@
 """Test component setup."""
-from custom_components.eskomloadshedding import (  # async_unload_entry,
+from custom_components.eskomloadshedding import (
     EskomLoadsheddingDataCoordinator,
     async_reload_entry,
     async_setup_entry,
