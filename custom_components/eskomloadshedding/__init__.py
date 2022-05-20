@@ -25,11 +25,6 @@ from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
     PLATFORMS,
 )
 
-# , EskomException, EskomAPIError, EskomNoStage
-# from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
-
-
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -71,9 +66,11 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
         hass.data.pop(DOMAIN)
     return unload_ok
 
+
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     await async_unload_entry(hass, entry)
     await async_setup_entry(hass, entry)
+
 
 class EskomLoadsheddingDataCoordinator(DataUpdateCoordinator):
     """Class to manage fetching data from the API."""
@@ -100,17 +97,22 @@ class EskomLoadsheddingDataCoordinator(DataUpdateCoordinator):
         if (self.config_entry.options.get(CONF_PROVINCE_ID)) and (
             self.config_entry.options.get(CONF_SUBURB_ID)
         ):
-            if (self.api.results.stage is not Stage.UNKNOWN) or (
-                self.api.results.stage is not Stage.NO_LOAD_SHEDDING
-            ):
-                if (self.api.stage_changed()) or (len(self.api.results.schedule) == 0):
-                    self.api.get_schedule(
-                        province=Province(
-                            self.config_entry.options.get(CONF_PROVINCE_ID)
-                        ),
-                        suburb=Suburb(id=self.config_entry.options.get(CONF_SUBURB_ID)),
-                        stage=stage,
-                    )
+            if self.api.results.stage is not Stage.UNKNOWN:
+                if self.api.results.stage is Stage.NO_LOAD_SHEDDING:
+                    self.api.clear_schedule()
+                else:
+                    if (self.api.stage_changed()) or (
+                        len(self.api.results.schedule) == 0
+                    ):
+                        self.api.get_schedule(
+                            province=Province(
+                                self.config_entry.options.get(CONF_PROVINCE_ID)
+                            ),
+                            suburb=Suburb(
+                                id=self.config_entry.options.get(CONF_SUBURB_ID)
+                            ),
+                            stage=stage,
+                        )
 
                 # _LOGGER.info(
                 #     ">>>>>>>>>>>>>>Stage is : %s",

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import logging
 
 from homeassistant.helpers.config_validation import boolean
 from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
@@ -10,6 +11,12 @@ from .const import (
     DEBUG_SCHEDULE,
     DEBUG_STAGE,
 )
+
+_LOGGER = logging.getLogger(__name__)
+
+
+class EskomProviderError(Exception):
+    pass
 
 
 class EskomAPI:
@@ -31,13 +38,23 @@ class EskomAPI:
         if self.debug_flag:
             stage = DEBUG_STAGE
         else:
-            stage = self.eskom.get_stage()
+
+            try:
+                stage = self.eskom.get_stage()
+            except ProviderError as exception:
+                raise EskomProviderError from None
+            except Exception as exception:
+                _LOGGER.exception(exception)
 
         if stage == self.results.stage:
             self.stage_changed_flag = False
 
         self.results.stage = stage
         return self.results.stage
+
+    def clear_schedule(self) -> None:
+        """Clear schedule"""
+        self.results.schedule = []
 
     def get_schedule(self, province: Province, suburb: Suburb, stage: Stage) -> tuple:
         """Return schedule"""
