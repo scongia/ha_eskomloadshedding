@@ -71,6 +71,9 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
         hass.data.pop(DOMAIN)
     return unload_ok
 
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    await async_unload_entry(hass, entry)
+    await async_setup_entry(hass, entry)
 
 class EskomLoadsheddingDataCoordinator(DataUpdateCoordinator):
     """Class to manage fetching data from the API."""
