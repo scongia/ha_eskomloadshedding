@@ -1,11 +1,11 @@
 repos:
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.3.0
+    rev: v2.32.1
     hooks:
       - id: pyupgrade
         args: [--py37-plus]
   - repo: https://github.com/psf/black
-    rev: 19.10b0
+    rev: 22.3.0
     hooks:
       - id: black
         args:
@@ -13,7 +13,7 @@ repos:
           - --quiet
         files: ^((homeassistant|script|tests)/.+)?[^/]+\.py$
   - repo: https://github.com/codespell-project/codespell
-    rev: v1.16.0
+    rev: v2.1.0 
     hooks:
       - id: codespell
         args:
