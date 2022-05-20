@@ -7,7 +7,7 @@ from custom_components.eskomloadshedding import (
 from custom_components.eskomloadshedding.const import DOMAIN
 
 
-async def test_setup_unload_and_reload_entry(hass, bypass_get_data):
+async def test_setup_unload_and_reload_entry(hass):
     """Test entry setup and unload."""
     # Create a mock entry so we don't have to go through config flow
     # config_entry = MockConfigEntry(
