@@ -2,6 +2,7 @@
 gidgethub[aiohttp]==4.1.1
 
 # Strictly for tests
+load_shedding==0.4.0
 codecov==2.1.12
 coverage==6.3.2
 pytest==7.1.1
