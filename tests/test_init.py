@@ -17,7 +17,7 @@ async def test_setup_unload_and_reload_entry(hass):
     #     domain=DOMAIN, data={}, entry_id=""
     # )
 
-    config_entry = MockConfigEntry(domain=DOMAIN, data={}, entry_id="test")
+    config_entry = MockConfigEntry(domain=DOMAIN)
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be. Because we have patched the ocppDataUpdateCoordinator.async_get_data
