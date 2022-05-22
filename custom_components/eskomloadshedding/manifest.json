@@ -5,7 +5,7 @@
   "documentation": "https://github.com/scongia/ha_eskomloadshedding",
   "issue_tracker": "https://github.com/scongia/ha_eskomloadshedding/issues",
   "requirements": ["load-shedding==0.4.0"],
-  "version": "1.0.1",
+  "version": "1.0.2",
   "dependencies": [],
   "codeowners": ["@scongia"], 
   "iot_class": "cloud_polling"
