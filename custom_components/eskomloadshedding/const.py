@@ -11,7 +11,7 @@ from load_shedding.providers.eskom import Province, Stage
 
 DOMAIN = "eskomloadshedding"
 
-DEBUG_FLAG = True
+DEBUG_FLAG = False
 
 DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S%f%z"  # Consider moving to const
 DEBUG_STAGE: Final = Stage.STAGE_2
