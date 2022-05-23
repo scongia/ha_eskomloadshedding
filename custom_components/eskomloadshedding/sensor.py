@@ -24,7 +24,6 @@ from .const import (  # ATTR_BYTES_RECEIVED,; ATTR_BYTES_SENT,; ATTR_SERVER_COUN
     ATTR_SHEDDING_STAGE,
     ATTR_SUBURB_ID,
     ATTR_SCAN_INTERVAL,
-    ATTR_SHEDDING_NEXT,
     CONF_PROVINCE_ID,
     CONF_SUBURB_ID,
     CONF_SCAN_PERIOD,
@@ -34,6 +33,7 @@ from .const import (  # ATTR_BYTES_RECEIVED,; ATTR_BYTES_SENT,; ATTR_SERVER_COUN
     DOMAIN,
     ICON,
     SENSOR_TYPES,
+    NOT_CONFIGURED,
     EskomLoadsheddingSensorEntityDescription,
 )
 
@@ -83,51 +83,23 @@ class EskomLoadsheddingSensor(
         if self.coordinator.data:
             if self.entity_description.key == ATTR_SHEDDING_STAGE:
                 self._state = self.coordinator.data[self.entity_description.key]
-            if self.entity_description.key == ATTR_SHEDDING_NEXT:
-                state = self.coordinator.data[self.entity_description.key]
-                if state is None:
-                    self._state = None
-                else:
-                    date_time_format = "%Y-%m-%d %H:%M"
-                    self._state = datetime.strptime(state, date_time_format)
         return self._state
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         if self.coordinator.data is not None:
-            if self.coordinator.config_entry.options.get(CONF_PROVINCE_ID) is not None:
-                self._attrs.update(
-                    {
-                        ATTR_PROVINCE_NAME: str(
-                            Province(
-                                self.coordinator.config_entry.options.get(
-                                    CONF_PROVINCE_ID
-                                )
-                            )
-                        )
-                    }
-                )
-            else:
-                self._attrs.update({ATTR_PROVINCE_NAME: "NOT_CONFIGURED"})
-
             self._attrs.update(
                 {
-                    ATTR_PROVINCE_ID: self.coordinator.config_entry.options.get(
-                        CONF_PROVINCE_ID, "NOT_CONFIGURED"
-                    ),
-                    ATTR_SUBURB_ID: self.coordinator.config_entry.options.get(
-                        CONF_SUBURB_ID, "NOT_CONFIGURED"
-                    ),
                     ATTR_SCAN_INTERVAL: self.coordinator.config_entry.options.get(
                         CONF_SCAN_PERIOD, DEFAULT_SCAN_INTERVAL
                     ),
                 }
             )
 
-            self._attrs[ATTR_SHEDDING_STAGE] = self.coordinator.data[
-                ATTR_SHEDDING_STAGE
-            ]
+            self._attrs[ATTR_SHEDDING_STAGE] = str(
+                Stage(self.coordinator.data[ATTR_SHEDDING_STAGE])
+            )
 
         return self._attrs
 

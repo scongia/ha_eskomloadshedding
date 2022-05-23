@@ -105,6 +105,7 @@ class EskomLoadsheddingDataCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Update data via library."""
         try:
+            _LOGGER.info("Start trigger hass.async_add_executor_job(self.api.get_data)")
             return await self.hass.async_add_executor_job(self.api.get_data)
         except Exception as exception:
             raise UpdateFailed() from exception

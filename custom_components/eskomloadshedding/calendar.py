@@ -10,6 +10,7 @@ from homeassistant.const import ATTR_ATTRIBUTION, CONF_ID
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from load_shedding.providers.eskom import Province, Stage
 
 from . import EskomLoadsheddingDataCoordinator
 from .const import (
@@ -17,9 +18,16 @@ from .const import (
     ATTR_CALENDAR_ICON,
     ATTR_CALENDAR_ID,
     ATTR_CALENDAR_NAME,
+    ATTR_PROVINCE_ID,
+    ATTR_PROVINCE_NAME,
     ATTR_SCHEDULE,
+    ATTR_SUBURB_ID,
     ATTRIBUTION,
+    CONF_PROVINCE_ID,
+    CONF_SUBURB_ID,
+    DATE_TIME_FORMAT,
     DOMAIN,
+    NOT_CONFIGURED,
 )
 
 
@@ -51,6 +59,37 @@ class EskomLoadsheddingCalendar(
         self._attr_unique_id = ATTR_CALENDAR_ID
         self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
         self._event: CalendarEvent | None = None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        if self.coordinator.data is not None:
+            if self.coordinator.config_entry.options.get(CONF_PROVINCE_ID) is not None:
+                self._attrs.update(
+                    {
+                        ATTR_PROVINCE_NAME: str(
+                            Province(
+                                self.coordinator.config_entry.options.get(
+                                    CONF_PROVINCE_ID
+                                )
+                            )
+                        )
+                    }
+                )
+            else:
+                self._attrs.update({ATTR_PROVINCE_NAME: NOT_CONFIGURED})
+
+            self._attrs.update(
+                {
+                    ATTR_PROVINCE_ID: self.coordinator.config_entry.options.get(
+                        CONF_PROVINCE_ID, NOT_CONFIGURED
+                    ),
+                    ATTR_SUBURB_ID: self.coordinator.config_entry.options.get(
+                        CONF_SUBURB_ID, NOT_CONFIGURED
+                    ),
+                }
+            )
+
+        return self._attrs
 
     @property
     def event(self) -> CalendarEvent | None:
@@ -88,16 +127,15 @@ class EskomLoadsheddingCalendar(
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        date_time_format = "%Y-%m-%d %H:%M"
 
         self._event = None
         if self.coordinator.data is not None:
             if len(self.coordinator.data[ATTR_SCHEDULE]) > 0:
                 date_time_start = datetime.strptime(
-                    self.coordinator.data[ATTR_SCHEDULE][0][0], date_time_format
+                    self.coordinator.data[ATTR_SCHEDULE][0][0], DATE_TIME_FORMAT
                 )
                 date_time_end = datetime.strptime(
-                    self.coordinator.data[ATTR_SCHEDULE][0][1], date_time_format
+                    self.coordinator.data[ATTR_SCHEDULE][0][1], DATE_TIME_FORMAT
                 )
                 self._event = CalendarEvent(
                     summary=ATTR_CALENDAR_EVENT_SUMMARY,
