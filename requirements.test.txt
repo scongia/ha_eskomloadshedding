@@ -2,8 +2,4 @@
 load_shedding==0.4.0
 
 # Strictly for tests
-# codecov==2.1.12
-# coverage==6.3.2
-pytest==7.1.2
-# pytest-cov==2.12.1
-pytest-homeassistant-custom-component==0.4.0
+pytest-homeassistant-custom-component==0.9.3
