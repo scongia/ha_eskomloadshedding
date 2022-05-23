@@ -29,7 +29,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Twente Milieu calendar based on a config entry."""
-    eskom_loadshedding_coordinator = hass.data[DOMAIN]
+    eskom_loadshedding_coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities([EskomLoadsheddingCalendar(eskom_loadshedding_coordinator)])
 
 
@@ -82,13 +82,6 @@ class EskomLoadsheddingCalendar(
                         end=end,
                     )
                 )
-                # event = {
-                #     "all_day": False,
-                #     "start": {"dateTime": start.isoformat()},
-                #     "end": {"dateTime": end.isoformat()},
-                #     "summary": ATTR_CALENDAR_EVENT_SUMMARY
-                # }
-                # events.append(event)
 
         return events
 
@@ -111,11 +104,6 @@ class EskomLoadsheddingCalendar(
                     start=date_time_start,
                     end=date_time_end,
                 )
-                # self._event = {
-                #     "all_day": False,
-                #     "start": {"dateTime": date_time_start.isoformat()},
-                #     "end": {"dateTime": date_time_end.isoformat()},
-                # }
 
         super()._handle_coordinator_update()
 

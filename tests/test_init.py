@@ -9,6 +9,8 @@ from custom_components.eskomloadshedding import (
 )
 from custom_components.eskomloadshedding.const import DOMAIN
 
+from .const import MOCK_CONFIG
+
 
 async def test_setup_unload_and_reload_entry(hass):
     """Test entry setup and unload."""
@@ -17,7 +19,9 @@ async def test_setup_unload_and_reload_entry(hass):
     #     domain=DOMAIN, data={}, entry_id=""
     # )
 
-    config_entry = MockConfigEntry(domain=DOMAIN)
+    #
+
+    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG, entry_id="test")
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be. Because we have patched the ocppDataUpdateCoordinator.async_get_data

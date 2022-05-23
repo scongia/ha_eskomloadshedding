@@ -40,13 +40,13 @@ from .const import (  # ATTR_BYTES_RECEIVED,; ATTR_BYTES_SENT,; ATTR_SERVER_COUN
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    config_entry: ConfigEntry,
+    entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Speedtestdotnet sensors."""
-    eskom_loadshedding_coordinator = hass.data[DOMAIN]
+    coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        EskomLoadsheddingSensor(eskom_loadshedding_coordinator, description)
+        EskomLoadsheddingSensor(coordinator, description)
         for description in SENSOR_TYPES
     )
 
@@ -82,7 +82,7 @@ class EskomLoadsheddingSensor(
         """Return native value for entity."""
         if self.coordinator.data:
             if self.entity_description.key == ATTR_SHEDDING_STAGE:
-                self._state = self.coordinator.data[self.entity_description.key].value
+                self._state = self.coordinator.data[self.entity_description.key]
             if self.entity_description.key == ATTR_SHEDDING_NEXT:
                 state = self.coordinator.data[self.entity_description.key]
                 if state is None:
@@ -125,14 +125,9 @@ class EskomLoadsheddingSensor(
                 }
             )
 
-            if self.entity_description.key == "stage":
-                self._attrs[ATTR_SHEDDING_STAGE] = self.coordinator.data[
-                    ATTR_SHEDDING_STAGE
-                ].value
-            elif self.entity_description.key == "next_outage":
-                self._attrs[ATTR_SHEDDING_NEXT] = self.coordinator.data[
-                    ATTR_SHEDDING_NEXT
-                ]
+            self._attrs[ATTR_SHEDDING_STAGE] = self.coordinator.data[
+                ATTR_SHEDDING_STAGE
+            ]
 
         return self._attrs
 

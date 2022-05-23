@@ -1,6 +1,9 @@
+import asyncio
 from datetime import datetime, timedelta, timezone
+import json
 import logging
 
+import async_timeout
 from homeassistant.helpers.config_validation import boolean
 from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
 
@@ -12,6 +15,8 @@ from .const import (
     DEBUG_STAGE,
 )
 
+TIMEOUT = 10
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -22,20 +27,29 @@ class EskomProviderError(Exception):
 class EskomAPI:
     """Interface class to obtain loadshedding information using the Eskom API"""
 
-    def __init__(self, debug_flag=False):
+    def __init__(self, province: str, suburb: str, debug=False):
         """Initializes class parameters"""
         self.eskom = Eskom()
-        self.stage = Stage.UNKNOWN
-        self.stage_changed_flag = True
         self.results = EskomLoadsheddingResults()
 
-        self.debug_flag: bool = debug_flag
+        self._stage_changed_flag = True
+        self._province = province
+        self._suburb = suburb
+        self._debug_flag: bool = debug
+
+    def setProvince(self, province):
+        """Set Province"""
+        self._province = province
+
+    def setSuburb(self, suburb):
+        """Set Suburb"""
+        self._suburb = suburb
 
     def get_stage(self) -> Stage:
         """Return load shedding stage"""
-        stage = Stage.UNKNOWN
+        stage: Stage = Stage.UNKNOWN
 
-        if self.debug_flag:
+        if self._debug_flag:
             stage = DEBUG_STAGE
         else:
 
@@ -46,8 +60,9 @@ class EskomAPI:
             except Exception as exception:
                 _LOGGER.exception(exception)
 
+        # Is new stage same as previous results stage
         if stage == self.results.stage:
-            self.stage_changed_flag = False
+            self._stage_changed_flag = False
 
         self.results.stage = stage
         return self.results.stage
@@ -59,9 +74,10 @@ class EskomAPI:
     def get_schedule(self, province: Province, suburb: Suburb, stage: Stage) -> tuple:
         """Return schedule"""
         schedule = []
-        if self.debug_flag:
+        if self._debug_flag:
             schedule = DEBUG_SCHEDULE
         else:
+
             schedule = self.eskom.get_schedule(
                 province=province, suburb=suburb, stage=stage
             )
@@ -79,10 +95,35 @@ class EskomAPI:
 
         return self.results.schedule
 
-    def stage_changed(self) -> boolean:
-        """Return stage_changed_flag"""
+    def get_data(self):
+        """get data"""
+        stage: Stage = self.get_stage()
 
-        return self.stage_changed_flag
+        if (self._province) and (self._suburb):
+            if stage is not Stage.UNKNOWN:
+                if stage is Stage.NO_LOAD_SHEDDING:
+                    self.clear_schedule()
+                else:
+                    if (self._stage_changed_flag) or (len(self.results.schedule) == 0):
+                        self.get_schedule(
+                            province=Province(self._province),
+                            suburb=Suburb(id=self._suburb),
+                            stage=stage,
+                        )
+
+        return self.results.dict()
+
+    async def async_get_data(self):
+        """Get the latest data from loadshedding.eskom.co.za"""
+
+        try:
+            async with async_timeout.timeout(TIMEOUT):
+                return await self.get_data()
+        except asyncio.TimeoutError as exception:
+            _LOGGER.error(
+                "Timeout error fetching schedule information from Eskom - %s",
+                exception,
+            )
 
 
 class EskomLoadsheddingResults:
@@ -95,7 +136,7 @@ class EskomLoadsheddingResults:
 
     def dict(self):
         """Return dictionary of result data"""
-        data = {ATTR_SHEDDING_STAGE: self.stage, ATTR_SCHEDULE: self.schedule}
+        data = {ATTR_SHEDDING_STAGE: self.stage.value, ATTR_SCHEDULE: self.schedule}
         if len(self.schedule) > 0:
             next_outage = self.schedule[0][0]
             data.update({ATTR_SHEDDING_NEXT: next_outage})

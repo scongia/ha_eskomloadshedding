@@ -89,7 +89,7 @@ SENSOR_TYPES: Final[tuple[EskomLoadsheddingSensorEntityDescription, ...]] = (
 ICON = "mdi:lightning-bolt"
 
 NAME = "Eskom Loadshedding Interface"
-VERSION = "1.0.6"
+VERSION = "1.0.2"
 
 PLATFORMS = [Platform.SENSOR, Platform.CALENDAR]
 
@@ -135,3 +135,13 @@ PROVINCE_LIST: Final = {
     str(Province.NORTERN_CAPE): Province.NORTERN_CAPE,
     str(Province.WESTERN_CAPE): Province.WESTERN_CAPE,
 }
+ISSUE_URL = "https://github.com/scongia/ha_eskomloadshedding/issues"
+STARTUP_MESSAGE = f"""
+-------------------------------------------------------------------
+{NAME}
+Version: {VERSION}
+Eskom Loadshedding Integration!
+If you have any issues with this you need to open an issue here:
+{ISSUE_URL}
+-------------------------------------------------------------------
+"""

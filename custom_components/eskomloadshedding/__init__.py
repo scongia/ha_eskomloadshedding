@@ -1,7 +1,7 @@
 """The Eskom Load Shedding integration."""
 from __future__ import annotations
 
-from ast import Sub
+import asyncio
 from datetime import timedelta
 import logging
 
@@ -12,7 +12,7 @@ from homeassistant.exceptions import ConfigEntryNotReady, IntegrationError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from load_shedding.providers.eskom import Province, Stage, Suburb
 
-from .ha_eskomloadshedding import EskomAPI, EskomLoadsheddingResults
+from .api import EskomAPI, EskomLoadsheddingResults
 
 from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
     CONF_MANUAL,
@@ -23,48 +23,67 @@ from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
     DOMAIN,
     ESKOM_LOADSHEDDING_SERVICE,
     PLATFORMS,
+    STARTUP_MESSAGE,
+    ISSUE_URL,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Eskom Loadshedding component."""
-    coordinator = EskomLoadsheddingDataCoordinator(hass, config_entry)
-    await coordinator.async_setup()
+    if hass.data.get(DOMAIN) is None:
+        hass.data.setdefault(DOMAIN, {})
+        _LOGGER.info(STARTUP_MESSAGE)
 
-    async def _enable_scheduled_status_tests(*_):
-        """Activate the data update coordinator."""
-        coordinator.update_interval = timedelta(
-            minutes=config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-        )
-        await coordinator.async_refresh()
+    province = entry.options.get(CONF_PROVINCE_ID)
+    suburb = entry.options.get(CONF_SUBURB_ID)
+    client = EskomAPI(
+        province,
+        suburb,
+        DEBUG_FLAG,
+    )
 
-    if not config_entry.options.get(CONF_MANUAL, False):
-        if hass.state == CoreState.running:
-            await _enable_scheduled_status_tests()
-        else:
-            hass.bus.async_listen_once(
-                EVENT_HOMEASSISTANT_STARTED, _enable_scheduled_status_tests
+    coordinator = EskomLoadsheddingDataCoordinator(hass, client=client)
+    await coordinator.async_refresh()
+
+    coordinator.update_interval = timedelta(
+        minutes=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+    )
+
+    if not coordinator.last_update_success:
+        raise ConfigEntryNotReady
+
+    hass.data[DOMAIN][entry.entry_id] = coordinator
+
+    for platform in PLATFORMS:
+        if entry.options.get(platform, True):
+            coordinator.platforms.append(platform)
+            hass.async_add_job(
+                hass.config_entries.async_forward_entry_setup(entry, platform)
             )
 
-    hass.data[DOMAIN] = coordinator
-
-    hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload Eskom Entry from config_entry."""
-    hass.services.async_remove(DOMAIN, ESKOM_LOADSHEDDING_SERVICE)
-
-    unload_ok = await hass.config_entries.async_unload_platforms(
-        config_entry, PLATFORMS
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    unloaded = all(
+        await asyncio.gather(
+            *[
+                hass.config_entries.async_forward_entry_unload(entry, platform)
+                for platform in PLATFORMS
+                if platform in coordinator.platforms
+            ]
+        )
     )
-    if unload_ok:
-        hass.data.pop(DOMAIN)
-    return unload_ok
+    if unloaded:
+        hass.data[DOMAIN].pop(entry.entry_id)
+
+    return
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -75,85 +94,33 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 class EskomLoadsheddingDataCoordinator(DataUpdateCoordinator):
     """Class to manage fetching data from the API."""
 
-    def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
+    def __init__(self, hass: HomeAssistant, client: EskomAPI) -> None:
         """Initialize the data object."""
         self.hass = hass
-        self.config_entry: ConfigEntry = config_entry
-        self.api: EskomAPI | None = None
+        self.platforms = []
+        self.api: EskomAPI = client
 
-        super().__init__(
-            self.hass, _LOGGER, name=DOMAIN, update_method=self.async_update
-        )
+        super().__init__(self.hass, _LOGGER, name=DOMAIN)
 
-    def initialize(self) -> None:
-        """Initialize eskom loadshedding api."""
-        self.api = EskomAPI(DEBUG_FLAG)
-
-    def update_data(self):
-        """Get the latest data from loadshedding.eskom.co.za"""
-
-        stage: Stage = self.api.get_stage()
-
-        if (self.config_entry.options.get(CONF_PROVINCE_ID)) and (
-            self.config_entry.options.get(CONF_SUBURB_ID)
-        ):
-            if self.api.results.stage is not Stage.UNKNOWN:
-                if self.api.results.stage is Stage.NO_LOAD_SHEDDING:
-                    self.api.clear_schedule()
-                else:
-                    if (self.api.stage_changed()) or (
-                        len(self.api.results.schedule) == 0
-                    ):
-                        self.api.get_schedule(
-                            province=Province(
-                                self.config_entry.options.get(CONF_PROVINCE_ID)
-                            ),
-                            suburb=Suburb(
-                                id=self.config_entry.options.get(CONF_SUBURB_ID)
-                            ),
-                            stage=stage,
-                        )
-
-                # _LOGGER.info(
-                #     ">>>>>>>>>>>>>>Stage is : %s",
-                #     self.stage,
-                # )
-        return self.api.results.dict()
-
-    async def async_update(self) -> dict[str, str]:
-        """Update Speedtest data."""
+    async def _async_update_data(self):
+        """Update data via library."""
         try:
-            return await self.hass.async_add_executor_job(self.update_data)
-        except Exception as err:
-            raise IntegrationError from err
-
-    async def async_setup(self) -> None:
-        """Setup Eskom Loadshedding"""
-        try:
-            await self.hass.async_add_executor_job(self.initialize)
-        except Exception as err:
-            raise ConfigEntryNotReady from err
-
-        async def request_update(call: ServiceCall) -> None:
-            """Request update."""
-            await self.async_request_refresh()
-
-        self.hass.services.async_register(
-            DOMAIN, ESKOM_LOADSHEDDING_SERVICE, request_update
-        )
-
-        self.config_entry.async_on_unload(
-            self.config_entry.add_update_listener(options_updated_listener)
-        )
+            return await self.hass.async_add_executor_job(self.api.get_data)
+        except Exception as exception:
+            raise UpdateFailed() from exception
 
 
 async def options_updated_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""
     if entry.options[CONF_MANUAL]:
-        hass.data[DOMAIN].update_interval = None
+        hass.data[DOMAIN][entry.entry_id].update_interval = None
         return
 
-    hass.data[DOMAIN].update_interval = timedelta(
+    hass.data[DOMAIN][entry.entry_id].update_interval = timedelta(
         minutes=entry.options[CONF_SCAN_INTERVAL]
     )
-    await hass.data[DOMAIN].async_request_refresh()
+
+    hass.data[DOMAIN][entry.entry_id].api.setProvince(entry.options[CONF_PROVINCE_ID])
+    hass.data[DOMAIN][entry.entry_id].api.setSuburb(entry.options[CONF_SUBURB_ID])
+
+    await hass.data[DOMAIN][entry.entry_id].async_request_refresh()
