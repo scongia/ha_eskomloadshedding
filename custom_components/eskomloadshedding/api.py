@@ -10,8 +10,10 @@ TIMEOUT = 10
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class EskomProviderError(Exception):
     pass
+
 
 class EskomAPI:
     """Interface class to obtain loadshedding information using the Eskom API"""
@@ -45,10 +47,10 @@ class EskomAPI:
             try:
                 eskom = Eskom()
                 stage = eskom.get_stage()
-            except ProviderError as exception:
-                raise EskomProviderError from None
-            except Exception as exception:
-                _LOGGER.exception(exception)
+            except ProviderError as ex:
+                _LOGGER.info("Provider Error %s", ex)
+            except Exception as ex:
+                _LOGGER.info("Exception %s", ex)
 
         # Is new stage same as previous results stage
         if stage == self.results.stage:
@@ -128,6 +130,7 @@ class EskomAPI:
             _LOGGER.info("GetData:Schedule: Skipping.. Stage is UNKNOWN")
 
         return self.results.dict()
+
 
 class EskomLoadsheddingResults:
     """Class for holding the results"""

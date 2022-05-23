@@ -6,11 +6,11 @@ from typing import Any
 
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_ATTRIBUTION, CONF_ID
+from homeassistant.const import ATTR_ATTRIBUTION
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from load_shedding.providers.eskom import Province, Stage
+from load_shedding.providers.eskom import Province
 
 from . import EskomLoadsheddingDataCoordinator
 from .const import (
