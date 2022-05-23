@@ -57,7 +57,8 @@ class EskomLoadsheddingEntity(CoordinatorEntity):
                 "integration": DOMAIN,
             }
         )
-        if self.coordinator.data is not None:
+
+        if self.coordinator.config_entry is not None:
             attrs.update(
                 {
                     ATTR_SCAN_INTERVAL: self.coordinator.config_entry.options.get(
@@ -66,6 +67,7 @@ class EskomLoadsheddingEntity(CoordinatorEntity):
                 }
             )
 
+        if self.coordinator.data is not None:
             attrs[ATTR_SHEDDING_STAGE] = str(
                 Stage(self.coordinator.data.get(ATTR_SHEDDING_STAGE))
             )
