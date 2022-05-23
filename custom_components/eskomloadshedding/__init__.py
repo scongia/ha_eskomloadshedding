@@ -29,7 +29,6 @@ from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
 
 _LOGGER = logging.getLogger(__name__)
 
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Eskom Loadshedding component."""
     if hass.data.get(DOMAIN) is None:
@@ -85,7 +84,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return
 
-
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     await async_unload_entry(hass, entry)
     await async_setup_entry(hass, entry)
@@ -109,7 +107,6 @@ class EskomLoadsheddingDataCoordinator(DataUpdateCoordinator):
             return await self.hass.async_add_executor_job(self.api.get_data)
         except Exception as exception:
             raise UpdateFailed() from exception
-
 
 async def options_updated_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""

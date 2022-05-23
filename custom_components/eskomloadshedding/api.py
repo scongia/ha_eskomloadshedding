@@ -1,10 +1,6 @@
-import asyncio
 from datetime import datetime, timedelta, timezone
-import json
 import logging
 
-import async_timeout
-from homeassistant.helpers.config_validation import boolean
 from load_shedding.load_shedding import ScheduleError, get_schedule
 from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
 
@@ -14,10 +10,8 @@ TIMEOUT = 10
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class EskomProviderError(Exception):
     pass
-
 
 class EskomAPI:
     """Interface class to obtain loadshedding information using the Eskom API"""
@@ -134,19 +128,6 @@ class EskomAPI:
             _LOGGER.info("GetData:Schedule: Skipping.. Stage is UNKNOWN")
 
         return self.results.dict()
-
-    # async def async_get_data(self):
-    #     """Get the latest data from loadshedding.eskom.co.za"""
-
-    #     try:
-    #         async with async_timeout.timeout(TIMEOUT):
-    #             return await self.get_data()
-    #     except asyncio.TimeoutError as exception:
-    #         _LOGGER.error(
-    #             "Timeout error fetching schedule information from Eskom - %s",
-    #             exception,
-    #         )
-
 
 class EskomLoadsheddingResults:
     """Class for holding the results"""

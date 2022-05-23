@@ -14,26 +14,19 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from load_shedding.providers.eskom import Province, Stage
+from load_shedding.providers.eskom import Stage
 
 from . import EskomLoadsheddingDataCoordinator
-
-from .const import (  # ATTR_BYTES_RECEIVED,; ATTR_BYTES_SENT,; ATTR_SERVER_COUNTRY,
-    ATTR_PROVINCE_ID,
-    ATTR_PROVINCE_NAME,
-    ATTR_SHEDDING_STAGE,
-    ATTR_SUBURB_ID,
+from .const import (
     ATTR_SCAN_INTERVAL,
-    CONF_PROVINCE_ID,
-    CONF_SUBURB_ID,
-    CONF_SCAN_PERIOD,
+    ATTR_SHEDDING_STAGE,
     ATTRIBUTION,
+    CONF_SCAN_PERIOD,
     DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     ICON,
     SENSOR_TYPES,
-    NOT_CONFIGURED,
     EskomLoadsheddingSensorEntityDescription,
 )
 
