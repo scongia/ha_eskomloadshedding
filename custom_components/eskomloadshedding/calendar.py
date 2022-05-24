@@ -62,7 +62,7 @@ class EskomLoadsheddingCalendar(
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        if self.coordinator.data is not None:
+        if self.coordinator.config_entry is not None:
             if self.coordinator.config_entry.options.get(CONF_PROVINCE_ID) is not None:
                 self._attrs.update(
                     {
