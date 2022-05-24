@@ -10,7 +10,7 @@ from homeassistant.const import Platform
 from load_shedding.providers.eskom import Province, Stage
 
 DOMAIN = "eskomloadshedding"
-VERSION = "1.0.5"
+VERSION = "1.0.6"
 
 DEBUG_FLAG = False
 
