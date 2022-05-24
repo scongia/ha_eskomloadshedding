@@ -10,6 +10,7 @@ from homeassistant.const import Platform
 from load_shedding.providers.eskom import Province, Stage
 
 DOMAIN = "eskomloadshedding"
+VERSION = "1.0.5"
 
 DEBUG_FLAG = False
 
@@ -88,7 +89,6 @@ SENSOR_TYPES: Final[tuple[EskomLoadsheddingSensorEntityDescription, ...]] = (
 ICON = "mdi:lightning-bolt"
 
 NAME = "Eskom Loadshedding Interface"
-VERSION = "1.0.2"
 
 PLATFORMS = [Platform.SENSOR, Platform.CALENDAR]
 
