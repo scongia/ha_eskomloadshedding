@@ -28,12 +28,12 @@ async def test_setup_unload_and_reload_entry(hass):
     # call, no code from custom_components/ocpp/api.py actually runs.
     assert await async_setup_entry(hass, config_entry)
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
-    assert type(hass.data[DOMAIN]) == EskomLoadsheddingDataCoordinator
+    assert type(hass.data[DOMAIN][config_entry.entry_id]) == EskomLoadsheddingDataCoordinator
 
     # Reload the entry and assert that the data from above is still there
     assert await async_reload_entry(hass) is None
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
-    assert type(hass.data[DOMAIN]) == EskomLoadsheddingDataCoordinator
+    assert type(hass.data[DOMAIN][config_entry.entry_id]) == EskomLoadsheddingDataCoordinator
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
