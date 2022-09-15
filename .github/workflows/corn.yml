@@ -9,13 +9,8 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Validate
     steps:
-        - uses: "actions/checkout@v2"
-
-        - name: HACS validation
-          uses: "hacs/action@main"
-          with:
-            category: "integration"
-            ignore: brands
+        - name: Repo checkout
+          uses: "actions/checkout@v2"
 
         - name: Hassfest validation
           uses: "home-assistant/actions/hassfest@master"
