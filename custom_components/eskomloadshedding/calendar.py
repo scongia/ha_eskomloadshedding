@@ -13,22 +13,11 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from load_shedding.providers.eskom import Province
 
 from . import EskomLoadsheddingDataCoordinator
-from .const import (
-    ATTR_CALENDAR_EVENT_SUMMARY,
-    ATTR_CALENDAR_ICON,
-    ATTR_CALENDAR_ID,
-    ATTR_CALENDAR_NAME,
-    ATTR_PROVINCE_ID,
-    ATTR_PROVINCE_NAME,
-    ATTR_SCHEDULE,
-    ATTR_SUBURB_ID,
-    ATTRIBUTION,
-    CONF_PROVINCE_ID,
-    CONF_SUBURB_ID,
-    DATE_TIME_FORMAT,
-    DOMAIN,
-    NOT_CONFIGURED,
-)
+from .const import (ATTR_CALENDAR_EVENT_SUMMARY, ATTR_CALENDAR_ICON,
+                    ATTR_CALENDAR_ID, ATTR_CALENDAR_NAME, ATTR_PROVINCE_ID,
+                    ATTR_PROVINCE_NAME, ATTR_SCHEDULE, ATTR_SUBURB_ID,
+                    ATTRIBUTION, CONF_PROVINCE_ID, CONF_SUBURB_ID,
+                    DATE_TIME_FORMAT, DOMAIN, NOT_CONFIGURED)
 
 
 async def async_setup_entry(

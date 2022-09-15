@@ -1,16 +1,13 @@
 """Integration API"""
-from datetime import datetime, timedelta, timezone
 import logging
+from datetime import datetime, timedelta, timezone
 
 from load_shedding.load_shedding import ScheduleError, get_schedule
-from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
+from load_shedding.providers.eskom import (Eskom, ProviderError, Province,
+                                           Stage, Suburb)
 
-from .const import (
-    ATTR_SCHEDULE,
-    ATTR_SHEDDING_STAGE,
-    DEBUG_SCHEDULE,
-    DEBUG_STAGE
-)
+from .const import (ATTR_SCHEDULE, ATTR_SHEDDING_STAGE, DEBUG_SCHEDULE,
+                    DEBUG_STAGE)
 
 TIMEOUT = 10
 

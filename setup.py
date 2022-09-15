@@ -1,16 +1,17 @@
 #!/usr/bin/env python
-# import os
-from setuptools import setup, find_packages
+import os
+
+from setuptools import find_packages, setup
 
 requirements = [
     "sqlalchemy",
 ]
-with open("requirements_test.txt","r") as f:
+with open("requirements_test.txt") as f:
     for line in f:
         if "txt" not in line and "#" not in line:
             requirements.append(line)
 
-with open("version", "r") as f:
+with open("version") as f:
     __version__ = f.read()
 
 setup(
@@ -33,5 +34,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Topic :: Software Development :: Testing",
     ],
-    entry_points={"pytest11": ["homeassistant = pytest_homeassistant_custom_component.plugins"]},
+    entry_points={
+        "pytest11": ["homeassistant = pytest_homeassistant_custom_component.plugins"]
+    },
 )
