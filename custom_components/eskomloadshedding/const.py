@@ -10,7 +10,7 @@ from homeassistant.const import Platform
 from load_shedding.providers.eskom import Province, Stage
 
 DOMAIN = "eskomloadshedding"
-VERSION = "1.0.6"
+VERSION = "1.0.7"
 
 DEBUG_FLAG = False
 
@@ -62,7 +62,7 @@ DEBUG_SCHEDULE: Final = [
     ("2022-06-20T12:00:00+00:00", "2022-06-20T14:30:00+00:00"),
 ]
 
-ESKOM_LOADSHEDDING_SERVICE: Final = "eskomloadshedding"
+# ESKOM_LOADSHEDDING_SERVICE: Final = "eskomloadshedding"
 
 
 @dataclass
@@ -119,6 +119,8 @@ DEFAULT_SCAN_INTERVAL: Final = 15
 DEFAULT_MANUAL_FLAG: Final = False
 DEFAULT_SET_AREA_FLAG: Final = True
 DEFAULT_PROVINCE_ID = 9
+
+ERR_MSG_REQUEST_REJECTED = "Request Rejected"
 
 ATTRIBUTION: Final = "Data retrieved from Eskom Loadshedding API"
 NOT_CONFIGURED: Final = "PLEASE CONFIGURE INTEGRATION"

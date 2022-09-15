@@ -1,15 +1,12 @@
 __pycache__
-.mypy_cache
-.devcontainer
-.vscode
-.github
-manage
-requirements.txt
-Makefile
-notes.txt
-
-# macOS Finder
+pythonenv*
+venv
+.venv
+.coverage
+.idea
+lib/
+bin/
+pytest.log
+.python-version
 .DS_Store
-
-# Windows Explorer
-desktop.ini
+*~

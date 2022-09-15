@@ -3,13 +3,13 @@
         "step": {
             "user": {
                 "title": "Eskom Load Shedding Integration",
-                "description": "Once complete, select 'Configure' to set your province and suburb"
+                "description": "You are about to install the Eskom Load Shedding integration. Once the installation has completed, please select 'Configure' to set your province and suburb for the calendar entity to work as desired"
             }
         },
         "error": {
-            "cannot_connect": "Failed to connect",
             "invalid_auth": "Invalid authentication",
-            "unknown": "Unexpected error"
+            "unknown": "Unexpected error",
+            "invalid_address": "Address not found in Twente Milieu service area"
         },
         "abort": {
             "already_configured": "Device is already configured"
@@ -42,6 +42,12 @@
                     "suburb_name": "Suburb"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Failed to connect to Eskom API services",
+            "search_string_too_short": "Enter at least 3 characters",
+            "request_rejected": "Request rejected by server",
+            "no_results_found": "No results found"
         }
     }
 }

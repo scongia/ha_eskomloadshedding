@@ -21,13 +21,13 @@ from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
     DEBUG_FLAG,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
-    ESKOM_LOADSHEDDING_SERVICE,
     PLATFORMS,
     STARTUP_MESSAGE,
     ISSUE_URL,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Eskom Loadshedding component."""
@@ -69,22 +69,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload Eskom Entry from config_entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-    unloaded = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in PLATFORMS
-                if platform in coordinator.platforms
-            ]
-        )
-    )
-    if unloaded:
-        hass.data[DOMAIN].pop(entry.entry_id)
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        del hass.data[DOMAIN][entry.entry_id]
+    return unload_ok
 
-    return
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Integration Reload"""
     await async_unload_entry(hass, entry)
     await async_setup_entry(hass, entry)
 
@@ -108,6 +100,7 @@ class EskomLoadsheddingDataCoordinator(DataUpdateCoordinator):
         except Exception as exception:
             raise UpdateFailed() from exception
 
+
 async def options_updated_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""
     if entry.options[CONF_MANUAL]:
@@ -118,7 +111,7 @@ async def options_updated_listener(hass: HomeAssistant, entry: ConfigEntry) -> N
         minutes=entry.options[CONF_SCAN_INTERVAL]
     )
 
-    hass.data[DOMAIN][entry.entry_id].api.setProvince(entry.options[CONF_PROVINCE_ID])
-    hass.data[DOMAIN][entry.entry_id].api.setSuburb(entry.options[CONF_SUBURB_ID])
+    hass.data[DOMAIN][entry.entry_id].api.set_province(entry.options[CONF_PROVINCE_ID])
+    hass.data[DOMAIN][entry.entry_id].api.set_suburb(entry.options[CONF_SUBURB_ID])
 
     await hass.data[DOMAIN][entry.entry_id].async_request_refresh()

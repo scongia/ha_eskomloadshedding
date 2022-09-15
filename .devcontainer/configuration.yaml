@@ -1,0 +1,47 @@
+default_config:
+
+# automation: !include automations.yaml
+
+logger:
+  default: warning
+  logs:
+    custom_components.eskomloadshedding: debug
+
+debugpy:
+  start: true
+  wait: true
+
+# eskomloadshedding:
+#   - province_id: 3
+#     suburb_id: 1024728
+#     scan_interval: 15
+
+# sun:
+
+# binary_sensor:
+#   - platform: workday
+#     country: CA
+#     province: "ON"
+
+# sensor:
+#   - platform: schedule_state
+#     name: Sun tracker
+#     events:
+#       - state: night # try this instead of default_state
+#       - start_template: "{{ states.sun.sun.attributes.next_dawn }}"
+#         end_template: "{{ states.sun.sun.attributes.next_rising }}"
+#         state: twilight
+#       - start_template: "{{ (states.sun.sun.attributes.next_rising | as_timestamp) - 600 }}" # 10 minutes before sunrise
+#         end_template: "{{ states.sun.sun.attributes.next_setting }}"
+#         state: day
+#       - start_template: "{{ states.sun.sun.attributes.next_setting }}"
+#         end_template: "{{ states.sun.sun.attributes.next_dusk }}"
+#         state: twilight
+
+# sensor schedules: !include_dir_merge_list schedules/
+
+# input_boolean:
+#   manual_mode:
+#     name: Manual mode
+#   vacation_mode:
+#     name: Vacation mode

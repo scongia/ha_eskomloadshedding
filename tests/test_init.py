@@ -7,10 +7,12 @@ from custom_components.eskomloadshedding import (
     async_setup_entry,
     async_unload_entry,
 )
-from custom_components.eskomloadshedding.const import DOMAIN
+from custom_components.eskomloadshedding.const import DOMAIN, ATTR_SHEDDING_STAGE, ATTR_CALENDAR_ID
 
 from .const import MOCK_CONFIG
 
+ENTITY_STAGE = f"sensor.{DOMAIN}_{ATTR_SHEDDING_STAGE}"
+ENTITY_SCHED = f"calendar.{DOMAIN}_{ATTR_CALENDAR_ID}"
 
 async def test_setup_unload_and_reload_entry(hass):
     """Test entry setup and unload."""

@@ -20,7 +20,7 @@ class EskomStageSensor(EskomLoadsheddingEntity, SensorEntity):
     @property
     def name(self):
         """Return the name of the sensor."""
-        return f"{DEFAULT_NAME}_{ATTR_SHEDDING_STAGE}"
+        return f"{DOMAIN}_{ATTR_SHEDDING_STAGE}"
 
     @property
     def icon(self):

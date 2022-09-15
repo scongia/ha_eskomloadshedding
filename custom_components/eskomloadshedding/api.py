@@ -1,18 +1,24 @@
 from datetime import datetime, timedelta, timezone
-import logging
+import logging, json
 
 from load_shedding.load_shedding import ScheduleError, get_schedule
 from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
 
-from .const import ATTR_SCHEDULE, ATTR_SHEDDING_STAGE, DEBUG_SCHEDULE, DEBUG_STAGE
+from .const import (
+    ATTR_SCHEDULE,
+    ATTR_SHEDDING_STAGE,
+    DEBUG_SCHEDULE,
+    DEBUG_STAGE,
+    ERR_MSG_REQUEST_REJECTED,
+)
 
 TIMEOUT = 10
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class EskomProviderError(Exception):
-    pass
+# class EskomProviderError(Exception):
+#     pass
 
 
 class EskomAPI:
@@ -28,11 +34,23 @@ class EskomAPI:
         self._suburb = suburb
         self._debug_flag: bool = debug
 
-    def setProvince(self, province):
+    def find_suburbs(self, search_text):
+        """Searh for suburb"""
+        try:
+            eskom = Eskom()
+            return eskom.find_suburbs(search_text)
+        except ProviderError as ex:
+            _LOGGER.info("Provider Error %s", ex)
+        except ValueError as ex:
+            raise EskomRequestRejectedException("Request Rejected") from ex
+        except Exception as ex:
+            raise EskomException("Esception calling find_suburbs") from ex
+
+    def set_province(self, province):
         """Set Province"""
         self._province = province
 
-    def setSuburb(self, suburb):
+    def set_suburb(self, suburb):
         """Set Suburb"""
         self._suburb = suburb
 
@@ -65,6 +83,9 @@ class EskomAPI:
 
     def get_schedule(self, province: Province, suburb: Suburb, stage: Stage) -> tuple:
         """Return schedule"""
+
+        self.clear_schedule()
+
         schedule = []
         _LOGGER.info("Get_Schedule: Getting info for suburb: %s", suburb.id)
         if self._debug_flag:
@@ -76,23 +97,21 @@ class EskomAPI:
                 schedule = get_schedule(
                     provider, province=province, suburb=suburb, stage=stage
                 )
-                _LOGGER.info("Schedule for %s %s: %s", suburb.id, stage, schedule)
-            except (ProviderError, ScheduleError) as ex:
-                _LOGGER.info(
-                    "Error: %s",
-                    str(ex),
-                )
+            except ScheduleError as ex:
+                _LOGGER.error( ex.args[0] )
+            except ProviderError as ex:
+                _LOGGER.error( ex.args[0] )
 
         utc_tz = timezone.utc
         days = 7
-        for s in schedule:
-            start = datetime.fromisoformat(s[0])
-            end = datetime.fromisoformat(s[1])
-            if start.date() > datetime.now(utc_tz).date() + timedelta(days=days):
+        for item in schedule:
+            start = datetime.fromisoformat(item[0])
+            end = datetime.fromisoformat(item[1])
+            if start > datetime.now(utc_tz) + timedelta(days=days):
                 continue
-            if end.date() < datetime.now(utc_tz).date():
+            if end < datetime.now(utc_tz):
                 continue
-            self.results.schedule.append(s)
+            self.results.schedule.append(item)
 
         return self.results.schedule
 
@@ -144,3 +163,11 @@ class EskomLoadsheddingResults:
         """Return dictionary of result data"""
         data = {ATTR_SHEDDING_STAGE: self.stage.value, ATTR_SCHEDULE: self.schedule}
         return data
+
+
+class EskomException(Exception):
+    """Base exception for this module"""
+
+
+class EskomRequestRejectedException(EskomException):
+    """Request Rejected Exception"""

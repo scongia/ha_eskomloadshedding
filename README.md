@@ -74,4 +74,3 @@ Once you have downloaded the component, you can install integration as follows:
 
 [dependency-shield]: https://img.shields.io/badge/Dependency-load--shedding_v0.4.0-blue?logo=gitlab&style=for-the-badge
 [load_shedding_api]: https://pypi.org/project/load-shedding
-

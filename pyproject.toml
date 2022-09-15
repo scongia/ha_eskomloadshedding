@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "ha_eskomloadshedding"
+version = "1.0.7"
+description = ""
+authors = ["scongia"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+portion = "==2.2.0"
+
+[tool.poetry.dev-dependencies]
+black = "^22.6.0"
+isort = "^5.10.1"
+flake8 = "^5.0.4"
+holidays = "^0.15"
+pytest = "^7.1.2"
+pytest-cov = "^3.0.0"
+homeassistant = "^2022.8.2"
+pytest-homeassistant-custom-component = "^0.11.7"
+mypy = "^0.971"
+coverage = "^6.4.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

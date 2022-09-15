@@ -10,6 +10,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import IntegrationError
 from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
+from .api import EskomAPI, EskomRequestRejectedException, EskomException
 import voluptuous as vol
 
 from .const import (
@@ -119,56 +120,88 @@ class EskomLoadsheddingOptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle suburb search flow."""
-        errors = {}
+        errors: dict[str, str] = {}
+
+        # Set selected province in options dropdown
+        default_province: str = ""
 
         if user_input is not None:
-            # Province ID
+            default_province = user_input[USER_PROVINCE_NAME]
+        else:
+            default_province = str(
+                Province(
+                    self.config_entry.options.get(
+                        (CONF_PROVINCE_ID), DEFAULT_PROVINCE_ID
+                    )
+                )
+            )
+
+        options = {
+            # Selected Province
+            vol.Optional(
+                USER_PROVINCE_NAME,
+                default=default_province,
+            ): vol.In(PROVINCE_LIST.keys()),
+            # Search String
+            vol.Required(USER_SUBURB_SEARCH): str,
+        }
+
+        if user_input is not None:
+            # Get selected Province ID
             selected_province = PROVINCE_LIST[user_input[USER_PROVINCE_NAME]]
-            # Province Search
-            search_result: list[Suburb] | None = None
+            # Get suburb search string
+            search_text: str = user_input[USER_SUBURB_SEARCH]
+
+            if len(search_text) < 3:
+                errors["base"] = "search_string_too_short"
+                return self.async_show_form(
+                    step_id="suburb_search",
+                    data_schema=vol.Schema(options),
+                    errors=errors,
+                )
+
             try:
-                search_text: str = user_input[USER_PROVINCE_NAME]
-                _LOGGER.info(
-                    "Eskomloadshedding:config_flow:step:suburb_search>> Start Suburb Search for suburb %s in %s",
-                    search_text,
-                    str(Province(selected_province)),
-                )
+                # Clear search result
+                search_result: list[Suburb] | None = None
 
-                api = Eskom()
+                api = EskomAPI(province=None, suburb=None, debug=False)
+
                 search_result = await self.hass.async_add_executor_job(
-                    api.find_suburbs, user_input[USER_SUBURB_SEARCH]
+                    api.find_suburbs, search_text
                 )
 
-                _LOGGER.info(
-                    "Eskomloadshedding:config_flow:step:suburb_search>> End Suburb Search. No suburbs found  %s",
-                    len(search_result),
+            except EskomRequestRejectedException:
+                errors["base"] = "request_rejected"
+                _LOGGER.error("Config_flow:step:suburb_search>> Error: %s", errors)
+                return self.async_show_form(
+                    step_id="suburb_search",
+                    data_schema=vol.Schema(options),
+                    errors=errors,
                 )
-            except Exception as err:
-                raise IntegrationError from err
+            except Exception:
+                errors["base"] = "cannot_connect"
+                _LOGGER.error("Config_flow:step:suburb_search>> Error: %s", errors)
+                return self.async_show_form(
+                    step_id="suburb_search",
+                    data_schema=vol.Schema(options),
+                    errors=errors,
+                )
 
             # Filter by province
+            if search_result is None:
+                errors["base"] = "no_results_found"
+                return self.async_show_form(
+                    step_id="suburb_search",
+                    data_schema=vol.Schema(options),
+                    errors=errors,
+                )
+
             for suburb in search_result:
                 if suburb.province == selected_province:
                     self._suburbs_select[suburb.name] = suburb
 
             self._config_data[CONF_PROVINCE_ID] = selected_province.value
             return await self.async_step_suburb_select()
-
-        options = {
-            # Province Name
-            vol.Optional(
-                USER_PROVINCE_NAME,
-                default=str(
-                    Province(
-                        self.config_entry.options.get(
-                            (CONF_PROVINCE_ID), DEFAULT_PROVINCE_ID
-                        )
-                    )
-                ),
-            ): vol.In(PROVINCE_LIST.keys()),
-            # Scan Interval
-            vol.Required(USER_SUBURB_SEARCH): str,
-        }
 
         return self.async_show_form(
             step_id="suburb_search", data_schema=vol.Schema(options), errors=errors
@@ -197,8 +230,3 @@ class EskomLoadsheddingOptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="suburb_select", data_schema=vol.Schema(options), errors=errors
         )
-
-
-async def _async_eskom_find_suburb(hass, search_text: str):
-    api = Eskom()
-    return await hass.async_add_executor_job(api.find_suburbs, search_text)
