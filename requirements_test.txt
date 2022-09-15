@@ -1,1 +1,5 @@
+pytest<6.0
+pytest-cov<3.0.0
 pytest-homeassistant-custom-component
+# From our manifest.json for our custom component
+load-shedding==0.4.0

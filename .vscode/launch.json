@@ -26,6 +26,14 @@
           "remoteRoot": "/usr/src/homeassistant"
         }
       ]
+    },
+    {
+      "name": "Debug Tests",
+      "type": "python",
+      "request": "test",
+      "console": "integratedTerminal",
+      "python": "${command:python.interpreterPath}",
+      "justMyCode": false
     }
   ]
 }
