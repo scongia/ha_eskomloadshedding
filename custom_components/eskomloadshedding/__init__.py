@@ -13,7 +13,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from load_shedding.providers.eskom import Province, Stage, Suburb
 
 from .api import EskomAPI, EskomLoadsheddingResults
-
 from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
     CONF_MANUAL,
     CONF_PROVINCE_ID,
@@ -21,9 +20,9 @@ from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
     DEBUG_FLAG,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    ISSUE_URL,
     PLATFORMS,
     STARTUP_MESSAGE,
-    ISSUE_URL,
 )
 
 _LOGGER = logging.getLogger(__name__)

@@ -1,4 +1,6 @@
 """Test component setup."""
+from pytest_homeassistant_custom_component.common import MockConfigEntry
+
 from custom_components.eskomloadshedding import (
     EskomLoadsheddingDataCoordinator,
     async_reload_entry,
@@ -10,7 +12,6 @@ from custom_components.eskomloadshedding.const import (
     ATTR_SHEDDING_STAGE,
     DOMAIN,
 )
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from .const import MOCK_CONFIG
 
