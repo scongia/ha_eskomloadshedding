@@ -4,21 +4,31 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import IntegrationError
-from load_shedding.providers.eskom import (Eskom, ProviderError, Province,
-                                           Stage, Suburb)
+from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
+import voluptuous as vol
 
 from .api import EskomAPI, EskomException, EskomRequestRejectedException
-from .const import (CONF_MANUAL, CONF_PROVINCE_ID, CONF_SUBURB_ID,
-                    DEFAULT_MANUAL_FLAG, DEFAULT_NAME, DEFAULT_PROVINCE_ID,
-                    DEFAULT_SCAN_INTERVAL, DEFAULT_SET_AREA_FLAG, DOMAIN,
-                    PROVINCE_LIST, USER_FLAG_SET_AREA, USER_PROVINCE_NAME,
-                    USER_SUBURB_NAME, USER_SUBURB_SEARCH)
+from .const import (
+    CONF_MANUAL,
+    CONF_PROVINCE_ID,
+    CONF_SUBURB_ID,
+    DEFAULT_MANUAL_FLAG,
+    DEFAULT_NAME,
+    DEFAULT_PROVINCE_ID,
+    DEFAULT_SCAN_INTERVAL,
+    DEFAULT_SET_AREA_FLAG,
+    DOMAIN,
+    PROVINCE_LIST,
+    USER_FLAG_SET_AREA,
+    USER_PROVINCE_NAME,
+    USER_SUBURB_NAME,
+    USER_SUBURB_SEARCH,
+)
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 

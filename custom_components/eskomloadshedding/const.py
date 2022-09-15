@@ -5,8 +5,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Final
 
-from homeassistant.components.sensor import (SensorEntityDescription,
-                                             SensorStateClass)
+from homeassistant.components.sensor import SensorEntityDescription, SensorStateClass
 from homeassistant.const import Platform
 from load_shedding.providers.eskom import Province, Stage
 

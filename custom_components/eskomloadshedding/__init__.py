@@ -2,15 +2,14 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 from datetime import timedelta
+import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_SCAN_INTERVAL, EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import Config, CoreState, HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryNotReady, IntegrationError
-from homeassistant.helpers.update_coordinator import (DataUpdateCoordinator,
-                                                      UpdateFailed)
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from load_shedding.providers.eskom import Province, Stage, Suburb
 
 from .api import EskomAPI, EskomLoadsheddingResults

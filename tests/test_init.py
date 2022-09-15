@@ -1,10 +1,15 @@
 """Test component setup."""
 from custom_components.eskomloadshedding import (
-    EskomLoadsheddingDataCoordinator, async_reload_entry, async_setup_entry,
-    async_unload_entry)
-from custom_components.eskomloadshedding.const import (ATTR_CALENDAR_ID,
-                                                       ATTR_SHEDDING_STAGE,
-                                                       DOMAIN)
+    EskomLoadsheddingDataCoordinator,
+    async_reload_entry,
+    async_setup_entry,
+    async_unload_entry,
+)
+from custom_components.eskomloadshedding.const import (
+    ATTR_CALENDAR_ID,
+    ATTR_SHEDDING_STAGE,
+    DOMAIN,
+)
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from .const import MOCK_CONFIG

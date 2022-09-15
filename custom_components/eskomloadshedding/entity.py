@@ -2,9 +2,17 @@
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from load_shedding.providers.eskom import Stage
 
-from .const import (ATTR_SCAN_INTERVAL, ATTR_SHEDDING_STAGE, ATTRIBUTION,
-                    CONF_SCAN_PERIOD, DEFAULT_NAME, DEFAULT_SCAN_INTERVAL,
-                    DOMAIN, NAME, VERSION)
+from .const import (
+    ATTR_SCAN_INTERVAL,
+    ATTR_SHEDDING_STAGE,
+    ATTRIBUTION,
+    CONF_SCAN_PERIOD,
+    DEFAULT_NAME,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    NAME,
+    VERSION,
+)
 
 
 class EskomLoadsheddingEntity(CoordinatorEntity):
