@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-import logging, json
+import logging
 
 from load_shedding.load_shedding import ScheduleError, get_schedule
 from load_shedding.providers.eskom import Eskom, ProviderError, Province, Stage, Suburb
@@ -8,8 +8,7 @@ from .const import (
     ATTR_SCHEDULE,
     ATTR_SHEDDING_STAGE,
     DEBUG_SCHEDULE,
-    DEBUG_STAGE,
-    ERR_MSG_REQUEST_REJECTED,
+    DEBUG_STAGE
 )
 
 TIMEOUT = 10

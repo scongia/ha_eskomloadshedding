@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os
+# import os
 from setuptools import setup, find_packages
 
 requirements = [
@@ -14,16 +14,16 @@ with open("version", "r") as f:
     __version__ = f.read()
 
 setup(
-    author="Matthew Flamm",
+    author="scongia",
     name="pytest-homeassistant-custom-component",
     version=__version__,
     packages=find_packages(),
     python_requires=">=3.9",
     install_requires=requirements,
     license="MIT license",
-    url="https://github.com/MatthewFlamm/pytest-homeassistant-custom-component",
-    author_email="matthewflamm0@gmail.com",
-    description="Experimental package to automatically extract test plugins for Home Assistant custom components",
+    url="https://github.com/scongia/ha_eskomloadshedding",
+    author_email="sergio.congia0@gmail.com",
+    description="integration component reports the current load shedding stage from Eskom (South African national utility provider)",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Framework :: Pytest",
