@@ -4,9 +4,11 @@ venv
 .venv
 .coverage
 .idea
+.cache/
 lib/
 bin/
-pytest.log
+*.log
 .python-version
 .DS_Store
 *~
+.mypy_cache/
