@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from load_shedding.providers.eskom import Province, Stage, Suburb
 
 from .api import EskomAPI, EskomLoadsheddingResults
+
 from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
     CONF_MANUAL,
     CONF_PROVINCE_ID,

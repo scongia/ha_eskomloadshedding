@@ -2,18 +2,16 @@
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.eskomloadshedding.const import (
-    DOMAIN,
-)
-
-from tests.const import CONFIG_DATA
-
 from custom_components.eskomloadshedding import (
     EskomLoadsheddingDataCoordinator,
     async_reload_entry,
     async_setup_entry,
     async_unload_entry,
 )
+from custom_components.eskomloadshedding.const import DOMAIN
+
+from tests.const import CONFIG_DATA
+
 # from custom_components.eskomloadshedding.const import (
 #     ATTR_CALENDAR_ID,
 #     ATTR_SHEDDING_STAGE,
@@ -28,12 +26,8 @@ from custom_components.eskomloadshedding import (
 
 async def test_setup_unload_and_reload_entry(hass):
     """Test entry setup and unload."""
-    
-    config_entry = MockConfigEntry(
-        domain=DOMAIN, 
-        data=CONFIG_DATA, 
-        entry_id="test"
-    )
+
+    config_entry = MockConfigEntry(domain=DOMAIN, data=CONFIG_DATA, entry_id="test")
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be. Because we have patched the ocppDataUpdateCoordinator.async_get_data
