@@ -21,7 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class EskomAPI:
-    """Interface class to obtain loadshedding information using the Eskom API"""
+    """Interface class to obtain loadshedding information using the Eskom API."""
 
     def __init__(self, province: str, suburb: str, debug=False):
         """Initializes class parameters"""
