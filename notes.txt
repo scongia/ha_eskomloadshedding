@@ -1,5 +1,0 @@
-Dockerdev
-  "mounts": [
-    // Custom configuration directory
-    "source=${localEnv:HOME}/Developments/hassio/test/ha_eskomloadshedding/custom_components,target=${containerWorkspaceFolder}/config/custom_components,type=bind",
-  ]
