@@ -4,15 +4,16 @@ from __future__ import annotations
 import asyncio
 from datetime import timedelta
 import logging
+from typing import Any
 
+from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_SCAN_INTERVAL, EVENT_HOMEASSISTANT_STARTED
-from homeassistant.core import Config, CoreState, HomeAssistant, ServiceCall
-from homeassistant.exceptions import ConfigEntryNotReady, IntegrationError
+from homeassistant.const import CONF_SCAN_INTERVAL
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from load_shedding.providers.eskom import Province, Stage, Suburb
 
-from .api import EskomAPI, EskomLoadsheddingResults
+from .api import EskomAPI
 
 from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
     CONF_MANUAL,
@@ -21,9 +22,13 @@ from .const import (  # DEFAULT_PROVINCE,; DEFAULT_STAGE,
     DEBUG_FLAG,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
-    ISSUE_URL,
+    UNKNOWN_STAGE,
     PLATFORMS,
     STARTUP_MESSAGE,
+    NOTIFICATION_ID,
+    NOTIFICATION_CONFIG_ID,
+    NOTIF_MSG_NO_ESKOM,
+    NOTIF_MSG_NO_CONFIG,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,15 +40,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.info(STARTUP_MESSAGE)
 
-    province = entry.options.get(CONF_PROVINCE_ID)
-    suburb = entry.options.get(CONF_SUBURB_ID)
     client = EskomAPI(
-        province,
-        suburb,
+        entry.options.get(CONF_PROVINCE_ID),
+        entry.options.get(CONF_SUBURB_ID),
         DEBUG_FLAG,
     )
 
-    coordinator = EskomLoadsheddingDataCoordinator(hass, client=client)
+    # Create Data Coordinator object and set update interval
+    coordinator = EskomLoadsheddingDataCoordinator(hass, client)
     await coordinator.async_refresh()
 
     coordinator.update_interval = timedelta(
@@ -55,6 +59,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
+    # Setup Platforms for SENSOR and CALENDAR
     for platform in PLATFORMS:
         if entry.options.get(platform, True):
             coordinator.platforms.append(platform)
@@ -65,20 +70,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     return True
-
-
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unload Eskom Entry from config_entry."""
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if unload_ok:
-        del hass.data[DOMAIN][entry.entry_id]
-    return unload_ok
-
-
-async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Integration Reload"""
-    await async_unload_entry(hass, entry)
-    await async_setup_entry(hass, entry)
 
 
 class EskomLoadsheddingDataCoordinator(DataUpdateCoordinator):
@@ -94,11 +85,67 @@ class EskomLoadsheddingDataCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         """Update data via library."""
+        results: dict[str, Any] = {}
+
         try:
-            _LOGGER.info("Start trigger hass.async_add_executor_job(self.api.get_data)")
-            return await self.hass.async_add_executor_job(self.api.get_data)
+            results = await self.hass.async_add_executor_job(self.api.get_data)
         except Exception as exception:
+            _LOGGER.error("Error while updating")
             raise UpdateFailed() from exception
+
+        # Create notification if Eskom is unavailable
+        if results["stage"] == UNKNOWN_STAGE.value:
+            _LOGGER.error("Unable to reach Eskom")
+            persistent_notification.async_create(
+                self.hass,
+                title="Eskom communication error",
+                message=NOTIF_MSG_NO_ESKOM,
+                notification_id=NOTIFICATION_ID,
+            )
+        else:
+            persistent_notification.async_dismiss(self.hass, NOTIFICATION_ID)
+
+        # Create notification if no schedule
+        if results["schedule"] == [] and results["stage"] != UNKNOWN_STAGE.value:
+            _LOGGER.error("Unable to reach Eskom")
+            persistent_notification.async_create(
+                self.hass,
+                title="Eskom configuration missing",
+                message=NOTIF_MSG_NO_CONFIG,
+                notification_id=NOTIFICATION_CONFIG_ID,
+            )
+        else:
+            persistent_notification.async_dismiss(self.hass, NOTIFICATION_CONFIG_ID)
+
+        return results
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload Eskom Entry from config_entry."""
+    # unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    # if unload_ok:
+    #     del hass.data[DOMAIN][entry.entry_id]
+    # return unload_ok
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    unloaded = all(
+        await asyncio.gather(
+            *[
+                hass.config_entries.async_forward_entry_unload(entry, platform)
+                for platform in PLATFORMS
+                if platform in coordinator.platforms
+            ]
+        )
+    )
+    if unloaded:
+        hass.data[DOMAIN].pop(entry.entry_id)
+
+    return unloaded
+
+
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Integration Reload"""
+    await async_unload_entry(hass, entry)
+    await async_setup_entry(hass, entry)
 
 
 async def options_updated_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:

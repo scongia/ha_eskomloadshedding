@@ -12,10 +12,6 @@ TIMEOUT = 10
 _LOGGER = logging.getLogger(__name__)
 
 
-# class EskomProviderError(Exception):
-#     pass
-
-
 class EskomAPI:
     """Interface class to obtain loadshedding information using the Eskom API."""
 
@@ -51,6 +47,7 @@ class EskomAPI:
 
     def get_stage(self) -> Stage:
         """Return load shedding stage"""
+        _LOGGER.info("Trigger getStage()")
         stage: Stage = Stage.UNKNOWN
 
         if self._debug_flag:
@@ -78,11 +75,11 @@ class EskomAPI:
 
     def get_schedule(self, province: Province, suburb: Suburb, stage: Stage) -> tuple:
         """Return schedule"""
+        _LOGGER.info("Get_Schedule: Getting info for suburb: %s", suburb.id)
 
         self.clear_schedule()
 
         schedule = []
-        _LOGGER.info("Get_Schedule: Getting info for suburb: %s", suburb.id)
         if self._debug_flag:
             _LOGGER.info("Get_Schedule: DEBUG SET")
             schedule = DEBUG_SCHEDULE
@@ -93,9 +90,9 @@ class EskomAPI:
                     provider, province=province, suburb=suburb, stage=stage
                 )
             except ScheduleError as ex:
-                _LOGGER.error( ex.args[0] )
+                _LOGGER.error(ex.args[0])
             except ProviderError as ex:
-                _LOGGER.error( ex.args[0] )
+                _LOGGER.error(ex.args[0])
 
         utc_tz = timezone.utc
         days = 7
@@ -112,36 +109,38 @@ class EskomAPI:
 
     def get_data(self):
         """get data"""
-        _LOGGER.info("GetData:Stage: Trigger getStage()")
-        stage: Stage = self.get_stage()
-        _LOGGER.info("GetData:Stage: Received Stage %s", stage.value)
 
+        # Get Stage
+        stage: Stage = self.get_stage()
         if stage is not Stage.UNKNOWN:
-            if self._province and self._suburb:
-                if stage is Stage.NO_LOAD_SHEDDING:
-                    _LOGGER.info("GetData:Schedule: Stage is 0... Clearing Schedule")
-                    self.clear_schedule()
-                else:
-                    _LOGGER.info(
-                        "GetData:Schedule: Has the stage changed? %s ",
-                        self._stage_changed_flag,
-                    )
-                    if (self._stage_changed_flag) or (len(self.results.schedule) == 0):
-                        _LOGGER.info(
-                            "GetData:Schedule: Schedule: Read and update Schedule "
-                        )
-                        self.get_schedule(
-                            province=Province(self._province),
-                            suburb=Suburb(id=self._suburb),
-                            stage=stage,
-                        )
-                        _LOGGER.info("GetData:Schedule: Schedule: Done.... ")
+            _LOGGER.warning("GetData:Schedule: Skipping.. Stage is UNKNOWN")
+            return self.results.dict()
+
+        # Get Schedule
+        # Use error codes..
+        if self._province and self._suburb:
+            if stage is Stage.NO_LOAD_SHEDDING:
+                _LOGGER.info("GetData:Schedule: Stage is 0... Clearing Schedule")
+                self.clear_schedule()
             else:
                 _LOGGER.info(
-                    "GetData:Schedule: Skipping.. Either Province or Suburb aren't missing"
+                    "GetData:Schedule: Has the stage changed? %s ",
+                    self._stage_changed_flag,
                 )
+                if (self._stage_changed_flag) or (len(self.results.schedule) == 0):
+                    _LOGGER.info(
+                        "GetData:Schedule: Schedule: Read and update Schedule "
+                    )
+                    self.get_schedule(
+                        province=Province(self._province),
+                        suburb=Suburb(id=self._suburb),
+                        stage=stage,
+                    )
+                    _LOGGER.info("GetData:Schedule: Schedule: Done.... ")
         else:
-            _LOGGER.info("GetData:Schedule: Skipping.. Stage is UNKNOWN")
+            _LOGGER.warning(
+                "GetData:Schedule: Skipping.. Either Province or Suburb aren't missing"
+            )
 
         return self.results.dict()
 

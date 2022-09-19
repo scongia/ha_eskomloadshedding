@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ha_eskomloadshedding"
+name = "eskomloadshedding"
 version = "1.0.7"
 description = ""
 authors = ["scongia"]

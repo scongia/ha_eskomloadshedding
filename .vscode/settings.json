@@ -3,7 +3,7 @@
     "python.linting.enabled": true,
     "python.pythonPath": "/usr/local/bin/python3",
     "files.associations": {
-        "*.yaml": "home-assistant"
+        "*.yaml": "yaml"
     },
     "python.testing.pytestArgs": [
         "tests"

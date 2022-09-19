@@ -8,8 +8,8 @@ logger:
     custom_components.eskomloadshedding: debug
 
 debugpy:
-  start: true
-  wait: true
+ start: true
+ wait: true
 
 # eskomloadshedding:
 #   - province_id: 3

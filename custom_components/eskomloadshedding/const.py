@@ -11,10 +11,12 @@ from load_shedding.providers.eskom import Province, Stage
 
 DOMAIN = "eskomloadshedding"
 VERSION = "1.0.7"
+ICON = "mdi:lightning-bolt"
+NAME = "Eskom Loadshedding Interface"
 
 DEBUG_FLAG = False
 
-DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S%f%z"  # Consider moving to const
+##Debug data - Consider mog to mock data / api
 DEBUG_STAGE: Final = Stage.STAGE_2
 DEBUG_SCHEDULE: Final = [
     ("2022-05-23T02:00:00+00:00", "2022-05-23T04:30:00+00:00"),
@@ -62,8 +64,6 @@ DEBUG_SCHEDULE: Final = [
     ("2022-06-20T12:00:00+00:00", "2022-06-20T14:30:00+00:00"),
 ]
 
-# ESKOM_LOADSHEDDING_SERVICE: Final = "eskomloadshedding"
-
 
 @dataclass
 class EskomLoadsheddingSensorEntityDescription(SensorEntityDescription):
@@ -72,25 +72,17 @@ class EskomLoadsheddingSensorEntityDescription(SensorEntityDescription):
     value: Callable = round
 
 
-SENSOR_TYPES: Final[tuple[EskomLoadsheddingSensorEntityDescription, ...]] = (
-    EskomLoadsheddingSensorEntityDescription(
-        key="stage",
-        name="Stage",
-        # native_unit_of_measurement=TIME_MILLISECONDS,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    # EskomLoadsheddingSensorEntityDescription(
-    #     key="next_outage",
-    #     name="Next Outage",
-    #     # native_unit_of_measurement=TIME_HOURS
-    # ),
+SENSOR_TYPES: Final[
+    tuple[EskomLoadsheddingSensorEntityDescription, ...]
+] = EskomLoadsheddingSensorEntityDescription(
+    key="stage",
+    name="Stage",
+    state_class=SensorStateClass.MEASUREMENT,
 )
 
-ICON = "mdi:lightning-bolt"
-
-NAME = "Eskom Loadshedding Interface"
-
 PLATFORMS = [Platform.SENSOR, Platform.CALENDAR]
+
+DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S%f%z"
 
 USER_PROVINCE_NAME: Final = "province_name"
 USER_SUBURB_NAME = "suburb_name"
@@ -125,6 +117,15 @@ ERR_MSG_REQUEST_REJECTED = "Request Rejected"
 ATTRIBUTION: Final = "Data retrieved from Eskom Loadshedding API"
 NOT_CONFIGURED: Final = "PLEASE CONFIGURE INTEGRATION"
 
+NOTIFICATION_ID = "eskom_notification_id"
+NOTIF_MSG_NO_ESKOM = "We are having trouble communicating with Eskom for loadshedding data. \\n [Check configurations](/config/integrations)."
+NOTIFICATION_CONFIG_ID = "eskom_notification_config_id"
+NOTIF_MSG_NO_CONFIG = "Please ensure that the integration is configured. [Check configurations](/config/integrations)."
+
+
+##Constants from load-shedding api
+UNKNOWN_STAGE = Stage.UNKNOWN
+
 PROVINCE_LIST: Final = {
     str(Province.EASTERN_CAPE): Province.EASTERN_CAPE,
     str(Province.FREE_STATE): Province.FREE_STATE,
@@ -136,6 +137,8 @@ PROVINCE_LIST: Final = {
     str(Province.NORTERN_CAPE): Province.NORTERN_CAPE,
     str(Province.WESTERN_CAPE): Province.WESTERN_CAPE,
 }
+
+##Startup Message
 ISSUE_URL = "https://github.com/scongia/ha_eskomloadshedding/issues"
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
